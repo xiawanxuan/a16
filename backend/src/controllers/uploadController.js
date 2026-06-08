@@ -1,6 +1,61 @@
 const Paper = require('../models/Paper');
 const BibTeXParser = require('../utils/bibtexParser');
 const CSVParser = require('../utils/csvParser');
+const RISParser = require('../utils/risParser');
+const EndNoteParser = require('../utils/endnoteParser');
+const NBibParser = require('../utils/nbibParser');
+
+const SUPPORTED_FORMATS = [
+  { ext: '.bib', name: 'BibTeX', parser: BibTeXParser, type: 'text' },
+  { ext: '.bibtex', name: 'BibTeX', parser: BibTeXParser, type: 'text' },
+  { ext: '.csv', name: 'CSV', parser: CSVParser, type: 'text' },
+  { ext: '.ris', name: 'RIS', parser: RISParser, type: 'text' },
+  { ext: '.enw', name: 'EndNote', parser: EndNoteParser, type: 'text' },
+  { ext: '.nbib', name: 'NBib (PubMed)', parser: NBibParser, type: 'text' },
+  { ext: '.txt', name: 'Text', parser: null, type: 'text' }
+];
+
+const BINARY_FORMATS = [
+  { ext: '.caj', name: 'CAJ (中国知网)', note: 'CAJ 是知网专有格式，请从知网导出为 BibTeX/CSV/RIS 格式后再导入' },
+  { ext: '.nh', name: 'NH (中国知网)', note: 'NH 是知网专有格式，请从知网导出为 BibTeX/CSV/RIS 格式后再导入' },
+  { ext: '.pdf', name: 'PDF', note: 'PDF 文件需要先提取元数据，建议使用文献管理软件导出为 BibTeX/CSV/RIS 格式' }
+];
+
+const detectFormat = (fileName, content) => {
+  const lowerName = fileName.toLowerCase();
+  
+  for (const format of SUPPORTED_FORMATS) {
+    if (lowerName.endsWith(format.ext)) {
+      return format;
+    }
+  }
+  
+  for (const format of BINARY_FORMATS) {
+    if (lowerName.endsWith(format.ext)) {
+      return { ...format, type: 'binary', parser: null };
+    }
+  }
+  
+  if (lowerName.endsWith('.txt')) {
+    if (content.includes('@article') || content.includes('@book') || content.includes('@inproceedings')) {
+      return { ...SUPPORTED_FORMATS.find(f => f.ext === '.bib'), ext: '.txt' };
+    }
+    if (content.match(/^TY\s*-\s*/m)) {
+      return { ...SUPPORTED_FORMATS.find(f => f.ext === '.ris'), ext: '.txt' };
+    }
+    if (content.match(/^%A\s/) || content.match(/^%T\s/)) {
+      return { ...SUPPORTED_FORMATS.find(f => f.ext === '.enw'), ext: '.txt' };
+    }
+    if (content.match(/^PMID\s*-/m) || content.match(/^TI\s{2}-/m)) {
+      return { ...SUPPORTED_FORMATS.find(f => f.ext === '.nbib'), ext: '.txt' };
+    }
+    if (content.includes(',') && content.includes('\n')) {
+      return { ...SUPPORTED_FORMATS.find(f => f.ext === '.csv'), ext: '.txt' };
+    }
+  }
+  
+  return null;
+};
 
 const uploadPapers = async (req, res, next) => {
   try {
@@ -8,40 +63,60 @@ const uploadPapers = async (req, res, next) => {
       return res.status(400).json({ message: '请选择要上传的文件' });
     }
 
-    const content = req.file.buffer.toString('utf-8');
-    const fileName = req.file.originalname.toLowerCase();
-    let papers = [];
+    const fileName = req.file.originalname;
+    const lowerName = fileName.toLowerCase();
+    
+    const isBinary = ['.caj', '.nh', '.pdf'].some(ext => lowerName.endsWith(ext));
+    
+    if (isBinary) {
+      const formatInfo = BINARY_FORMATS.find(f => lowerName.endsWith(f.ext));
+      return res.status(400).json({
+        message: `${formatInfo?.name || '该格式'}暂不支持直接导入`,
+        detail: formatInfo?.note || '请转换为支持的文本格式后再导入',
+        supportedFormats: SUPPORTED_FORMATS.map(f => f.name + f.ext)
+      });
+    }
 
-    if (fileName.endsWith('.bib') || fileName.endsWith('.bibtex')) {
-      const parser = new BibTeXParser();
+    let content;
+    try {
+      content = req.file.buffer.toString('utf-8');
+    } catch (e) {
+      return res.status(400).json({ message: '文件编码不支持，请确保文件为文本格式' });
+    }
+
+    const format = detectFormat(fileName, content);
+    
+    if (!format || !format.parser) {
+      return res.status(400).json({
+        message: '不支持的文件格式',
+        supportedFormats: SUPPORTED_FORMATS.map(f => f.name + f.ext),
+        note: 'CAJ、NH、PDF 等二进制格式请先转换为文本格式'
+      });
+    }
+
+    let papers = [];
+    const ParserClass = format.parser;
+    
+    try {
+      const parser = new ParserClass();
       papers = parser.parseToPapers(content);
-    } else if (fileName.endsWith('.csv')) {
-      const parser = new CSVParser();
-      papers = parser.parseToPapers(content);
-    } else if (fileName.endsWith('.txt')) {
-      const bibParser = new BibTeXParser();
-      const bibPapers = bibParser.parseToPapers(content);
-      
-      if (bibPapers.length > 0) {
-        papers = bibPapers;
-      } else {
-        const csvParser = new CSVParser();
-        papers = csvParser.parseToPapers(content);
-      }
-    } else {
-      return res.status(400).json({ message: '不支持的文件格式' });
+    } catch (parseError) {
+      return res.status(400).json({
+        message: `解析${format.name}格式失败`,
+        detail: parseError.message
+      });
     }
 
     papers = papers.filter(p => p.title && p.title.trim());
 
     if (papers.length === 0) {
-      return res.status(400).json({ message: '未在文件中找到有效的论文数据' });
+      return res.status(400).json({ message: '未在文件中找到有效的论文数据，请检查文件格式是否正确' });
     }
 
     const papersWithUser = papers.map(paper => ({
       ...paper,
       uploadedBy: req.user._id,
-      sourceFile: req.file.originalname
+      sourceFile: fileName
     }));
 
     let insertedCount = 0;
@@ -82,6 +157,7 @@ const uploadPapers = async (req, res, next) => {
         total: papers.length,
         inserted: insertedCount,
         skipped: skippedCount,
+        format: format.name,
         errors: errors.slice(0, 10)
       }
     });

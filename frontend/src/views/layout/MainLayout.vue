@@ -171,13 +171,26 @@ watch(() => route.path, () => {
 <style scoped lang="scss">
 .main-layout {
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
 }
 
 .sidebar {
   background-color: #001529;
+  -webkit-transition: width 0.3s ease;
   transition: width 0.3s ease;
   overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
 
   &.sidebar-collapse {
     width: 64px !important;
@@ -186,11 +199,19 @@ watch(() => route.path, () => {
 
 .logo {
   height: 60px;
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
   align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
   justify-content: center;
   padding: 0 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
 
   .logo-icon {
     font-size: 28px;
@@ -209,6 +230,7 @@ watch(() => route.path, () => {
 .sidebar-menu {
   border-right: none;
   height: calc(100vh - 60px);
+  height: calc(100dvh - 60px);
 
   :deep(.el-menu-item),
   :deep(.el-sub-menu__title) {
@@ -224,15 +246,29 @@ watch(() => route.path, () => {
 .header {
   background-color: #fff;
   box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  -webkit-box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
   align-items: center;
+  -webkit-box-pack: justify;
+  -ms-flex-pack: justify;
   justify-content: space-between;
   padding: 0 20px;
   height: 60px;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
+  min-height: 60px;
 }
 
 .header-left {
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
   align-items: center;
   gap: 15px;
 }
@@ -241,6 +277,8 @@ watch(() => route.path, () => {
   font-size: 20px;
   cursor: pointer;
   color: #606266;
+  -ms-flex-negative: 0;
+  flex-shrink: 0;
 
   &:hover {
     color: #409eff;
@@ -252,18 +290,27 @@ watch(() => route.path, () => {
 }
 
 .header-right {
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
   align-items: center;
 }
 
 .user-info {
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
   align-items: center;
   gap: 10px;
   cursor: pointer;
   padding: 0 10px;
   height: 40px;
   border-radius: 6px;
+  -webkit-transition: background-color 0.3s;
   transition: background-color 0.3s;
 
   &:hover {
@@ -273,6 +320,7 @@ watch(() => route.path, () => {
   .username {
     font-size: 14px;
     color: #606266;
+    white-space: nowrap;
   }
 }
 
@@ -280,10 +328,18 @@ watch(() => route.path, () => {
   background-color: #f5f7fa;
   padding: 20px;
   overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  -webkit-box-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
 }
 
 .fade-enter-active,
 .fade-leave-active {
+  -webkit-transition: opacity 0.3s ease;
   transition: opacity 0.3s ease;
 }
 

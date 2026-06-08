@@ -16,7 +16,7 @@
               :on-change="handleFileChange"
               :file-list="fileList"
               :limit="1"
-              accept=".bib,.bibtex,.csv,.txt"
+              accept=".bib,.bibtex,.csv,.ris,.enw,.nbib,.txt"
             >
               <el-icon class="el-icon--upload"><UploadFilled /></el-icon>
               <div class="el-upload__text">
@@ -24,7 +24,7 @@
               </div>
               <template #tip>
                 <div class="el-upload__tip">
-                  支持 BibTeX (.bib, .bibtex) 和 CSV (.csv) 格式文件，单次最多上传50MB
+                  支持 BibTeX、RIS、EndNote、NBib、CSV 等格式，单次最多上传50MB
                 </div>
               </template>
             </el-upload>
@@ -88,22 +88,26 @@
           
           <div class="format-card">
             <div class="format-header">
+              <el-icon class="format-icon ris"><Share /></el-icon>
+              <span class="format-name">RIS 格式</span>
+              <el-tag size="small" type="success">推荐</el-tag>
+            </div>
+            <p class="format-desc">通用文献交换格式，绝大多数数据库和文献管理软件都支持导出</p>
+            <div class="format-sources">
+              <span>Web of Science</span>
+              <span>Scopus</span>
+              <span>PubMed</span>
+              <span>CNKI</span>
+              <span>EndNote</span>
+            </div>
+          </div>
+
+          <div class="format-card">
+            <div class="format-header">
               <el-icon class="format-icon bib"><Document /></el-icon>
               <span class="format-name">BibTeX 格式</span>
             </div>
             <p class="format-desc">标准的BibTeX参考文献格式，可从Google Scholar、Web of Science、CNKI等数据库导出</p>
-            <div class="format-sample">
-              <code>
-@article{smith2023,<br/>
-&nbsp;&nbsp;title={论文标题},<br/>
-&nbsp;&nbsp;author={作者名},<br/>
-&nbsp;&nbsp;journal={期刊名},<br/>
-&nbsp;&nbsp;year={2023},<br/>
-&nbsp;&nbsp;volume={10},<br/>
-&nbsp;&nbsp;pages={1-15}<br/>
-}
-              </code>
-            </div>
           </div>
 
           <div class="format-card">
@@ -124,6 +128,33 @@
             </div>
           </div>
 
+          <div class="format-card">
+            <div class="format-header">
+              <el-icon class="format-icon endnote"><Notebook /></el-icon>
+              <span class="format-name">EndNote (.enw)</span>
+            </div>
+            <p class="format-desc">EndNote文献管理软件的导出格式，广泛应用于学术研究</p>
+          </div>
+
+          <div class="format-card">
+            <div class="format-header">
+              <el-icon class="format-icon nbib"><Reading /></el-icon>
+              <span class="format-name">NBib (PubMed)</span>
+            </div>
+            <p class="format-desc">PubMed数据库的导出格式，适用于生物医学领域文献</p>
+          </div>
+
+          <el-alert
+            title="CAJ / NH / PDF 格式说明"
+            type="info"
+            :closable="false"
+            show-icon
+            style="margin-bottom: 15px;"
+          >
+            <p>CAJ、NH 是中国知网的专有二进制格式，PDF 是文档格式，无法直接解析元数据。</p>
+            <p style="margin-top: 6px;"><strong>解决方法：</strong>从知网/数据库导出时选择「BibTeX」「RIS」或「CSV」格式即可。</p>
+          </el-alert>
+
           <div class="tips-section">
             <h4><el-icon><InfoFilled /></el-icon>导入提示</h4>
             <ul>
@@ -143,6 +174,18 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import {
+  UploadFilled,
+  Upload,
+  DataLine,
+  MagicStick,
+  Document,
+  Grid,
+  Share,
+  Notebook,
+  Reading,
+  InfoFilled
+} from '@element-plus/icons-vue'
 import { uploadPapers, importSampleData } from '@/api/upload'
 
 const router = useRouter()
@@ -342,7 +385,11 @@ const goToPapers = () => {
     margin-bottom: 15px;
 
     .format-header {
+      display: -webkit-box;
+      display: -ms-flexbox;
       display: flex;
+      -webkit-box-align: center;
+      -ms-flex-align: center;
       align-items: center;
       gap: 10px;
       margin-bottom: 10px;
@@ -352,13 +399,32 @@ const goToPapers = () => {
         padding: 8px;
         border-radius: 8px;
         color: #fff;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
 
         &.bib {
+          background: -webkit-gradient(linear, left top, right bottom, from(#409eff), to(#66b1ff));
           background: linear-gradient(135deg, #409eff, #66b1ff);
         }
 
         &.csv {
+          background: -webkit-gradient(linear, left top, right bottom, from(#67c23a), to(#85ce61));
           background: linear-gradient(135deg, #67c23a, #85ce61);
+        }
+
+        &.ris {
+          background: -webkit-gradient(linear, left top, right bottom, from(#722ed1), to(#9254de));
+          background: linear-gradient(135deg, #722ed1, #9254de);
+        }
+
+        &.endnote {
+          background: -webkit-gradient(linear, left top, right bottom, from(#fa8c16), to(#ffa940));
+          background: linear-gradient(135deg, #fa8c16, #ffa940);
+        }
+
+        &.nbib {
+          background: -webkit-gradient(linear, left top, right bottom, from(#13c2c2), to(#36cfc9));
+          background: linear-gradient(135deg, #13c2c2, #36cfc9);
         }
       }
 
@@ -376,21 +442,29 @@ const goToPapers = () => {
       margin-bottom: 12px;
     }
 
-    .format-sample {
-      background: #fff;
-      padding: 12px;
-      border-radius: 6px;
-      font-size: 11px;
-      line-height: 1.5;
+    .format-sources {
+      display: -webkit-box;
+      display: -ms-flexbox;
+      display: flex;
+      -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+      gap: 6px;
 
-      code {
+      span {
+        background: #fff;
         color: #606266;
-        font-family: 'Courier New', monospace;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 11px;
+        border: 1px solid #ebeef5;
       }
     }
 
     .format-fields {
+      display: -webkit-box;
+      display: -ms-flexbox;
       display: flex;
+      -ms-flex-wrap: wrap;
       flex-wrap: wrap;
       gap: 6px;
 
