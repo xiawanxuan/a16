@@ -225,6 +225,21 @@ function generateSamplePapers() {
     '林晓', '何勇', '高雪', '罗明', '谢芳'
   ];
 
+  const affiliationsPool = [
+    '清华大学', '北京大学', '浙江大学', '上海交通大学', '复旦大学',
+    '中国科学技术大学', '南京大学', '华中科技大学', '武汉大学', '西安交通大学',
+    '哈尔滨工业大学', '中山大学', '同济大学', '北京航空航天大学', '东南大学',
+    '中国科学院自动化研究所', '中国科学院计算技术研究所', '中国科学院软件研究所'
+  ];
+
+  const fundingPool = [
+    '国家自然科学基金', '国家重点研发计划', '国家社科基金', '科技部973计划',
+    '教育部博士点基金', '教育部新世纪优秀人才支持计划', '中国博士后科学基金',
+    '北京市自然科学基金', '上海市自然科学基金', '广东省自然科学基金',
+    '国家高技术研究发展计划(863计划)', '国家科技支撑计划',
+    '国家重大科学仪器设备开发专项', '国家国际科技合作专项'
+  ];
+
   const journals = [
     'IEEE Transactions on Neural Networks and Learning Systems',
     'Nature Communications',
@@ -299,6 +314,23 @@ function generateSamplePapers() {
       paperAuthors.push(shuffledAuthors[j]);
     }
 
+    const numAffiliations = Math.floor(Math.random() * 3) + 1;
+    const paperAffiliations = [];
+    const shuffledAffs = [...affiliationsPool].sort(() => Math.random() - 0.5);
+    
+    for (let j = 0; j < numAffiliations && j < shuffledAffs.length; j++) {
+      paperAffiliations.push(shuffledAffs[j]);
+    }
+
+    const numFunding = Math.floor(Math.random() * 3) + 1;
+    const paperFunding = [];
+    const shuffledFunding = [...fundingPool].sort(() => Math.random() - 0.5);
+    
+    for (let j = 0; j < numFunding && j < shuffledFunding.length; j++) {
+      const num = Math.floor(Math.random() * 1000000) + 100000;
+      paperFunding.push(`${shuffledFunding[j]} (No.${num})`);
+    }
+
     const numKeywords = Math.floor(Math.random() * 5) + 3;
     const paperKeywords = [];
     const shuffledKeywords = [...keywordsPool].sort(() => Math.random() - 0.5);
@@ -313,6 +345,8 @@ function generateSamplePapers() {
     papers.push({
       title: titles[i % titles.length] + (i >= titles.length ? ` (${Math.floor(i / titles.length) + 1})` : ''),
       authors: paperAuthors,
+      affiliations: paperAffiliations,
+      funding: paperFunding,
       journal: journals[Math.floor(Math.random() * journals.length)],
       year,
       volume: String(Math.floor(Math.random() * 30) + 20),

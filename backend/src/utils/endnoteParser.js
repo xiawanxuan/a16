@@ -19,6 +19,10 @@ class EndNoteParser {
       '%K': 'keywords',
       '%U': 'url',
       '%Z': 'notes',
+      '%~': 'affiliations',
+      '%+': 'affiliations',
+      '%G': 'funding',
+      '%R': 'doi',
       '%8': 'date',
       '%E': 'editor',
       '%S': 'series',
@@ -90,7 +94,7 @@ class EndNoteParser {
 
         const field = this.fieldMap[tag];
         if (field) {
-          if (field === 'authors' || field === 'keywords') {
+          if (['authors', 'keywords', 'affiliations', 'funding'].includes(field)) {
             if (!currentEntry[field]) {
               currentEntry[field] = [];
             }
@@ -131,6 +135,8 @@ class EndNoteParser {
         doi: entry.doi || '',
         abstract: entry.abstract || '',
         keywords: entry.keywords || [],
+        funding: entry.funding || [],
+        affiliations: entry.affiliations || [],
         source: 'endnote'
       };
 

@@ -106,16 +106,18 @@ const activeMenu = computed(() => route.path)
 const currentPageTitle = computed(() => route.meta.title || '')
 
 const menuItems = computed(() => {
-  const baseMenu = [
-    { path: '/dashboard', title: '概览仪表盘', icon: 'DataAnalysis' },
-    { path: '/papers', title: '论文管理', icon: 'Document' },
-    { path: '/upload', title: '文献导入', icon: 'Upload' },
-    { path: '/cooperation', title: '合作网络', icon: 'Connection' },
-    { path: '/citation', title: '被引分析', icon: 'TrendCharts' },
-    { path: '/trends', title: '热点趋势', icon: 'Histogram' },
-    { path: '/authors', title: '作者分析', icon: 'User' },
-    { path: '/journals', title: '期刊分析', icon: 'Reading' }
-  ]
+    const baseMenu = [
+      { path: '/dashboard', title: '概览仪表盘', icon: 'DataAnalysis' },
+      { path: '/papers', title: '论文管理', icon: 'Document' },
+      { path: '/upload', title: '文献导入', icon: 'Upload' },
+      { path: '/cooperation', title: '作者合作', icon: 'Connection' },
+      { path: '/affiliation', title: '机构合作', icon: 'OfficeBuilding' },
+      { path: '/citation', title: '被引分析', icon: 'TrendCharts' },
+      { path: '/trends', title: '热点趋势', icon: 'Histogram' },
+      { path: '/authors', title: '作者分析', icon: 'User' },
+      { path: '/journals', title: '期刊分析', icon: 'Reading' },
+      { path: '/funding', title: '基金统计', icon: 'Money' }
+    ]
   
   if (isAdmin.value) {
     baseMenu.push({ 

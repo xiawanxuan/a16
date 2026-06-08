@@ -46,3 +46,36 @@ export function getJournalAnalysis(params) {
     params
   })
 }
+
+export function getFundingAnalysis(params) {
+  return request({
+    url: '/analysis/funding-analysis',
+    method: 'get',
+    params
+  })
+}
+
+export function getAffiliationNetwork(params) {
+  return request({
+    url: '/analysis/affiliation-network',
+    method: 'get',
+    params
+  })
+}
+
+export function exportReport(params) {
+  const token = localStorage.getItem('token')
+  const queryString = new URLSearchParams(params).toString()
+  
+  return fetch(`/api/analysis/export-report?${queryString}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': token ? `Bearer ${token}` : ''
+    }
+  }).then(res => {
+    if (!res.ok) {
+      throw new Error('导出失败')
+    }
+    return res.blob()
+  })
+}

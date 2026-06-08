@@ -69,6 +69,18 @@ const routes = [
         meta: { title: '期刊分析', icon: 'Reading' }
       },
       {
+        path: 'funding',
+        name: 'Funding',
+        component: () => import('@/views/analysis/FundingAnalysis.vue'),
+        meta: { title: '基金统计', icon: 'Money' }
+      },
+      {
+        path: 'affiliation',
+        name: 'Affiliation',
+        component: () => import('@/views/analysis/AffiliationNetwork.vue'),
+        meta: { title: '机构合作', icon: 'OfficeBuilding' }
+      },
+      {
         path: 'profile',
         name: 'Profile',
         component: () => import('@/views/user/Profile.vue'),

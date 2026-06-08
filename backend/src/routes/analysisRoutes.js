@@ -6,7 +6,10 @@ const {
   getKeywordTrends,
   getAuthorProductivity,
   getJournalAnalysis,
-  getOverviewStats
+  getFundingAnalysis,
+  getAffiliationNetwork,
+  getOverviewStats,
+  exportReport
 } = require('../controllers/analysisController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -18,5 +21,8 @@ router.get('/citation-analysis', getCitationAnalysis);
 router.get('/keyword-trends', getKeywordTrends);
 router.get('/author-productivity', getAuthorProductivity);
 router.get('/journal-analysis', getJournalAnalysis);
+router.get('/funding-analysis', getFundingAnalysis);
+router.get('/affiliation-network', getAffiliationNetwork);
+router.get('/export-report', exportReport);
 
 module.exports = router;

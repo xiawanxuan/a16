@@ -110,6 +110,13 @@
                 <div class="action-desc">发现研究前沿</div>
               </div>
             </div>
+            <div class="action-item" @click="handleExportReport">
+              <el-icon class="action-icon report"><DocumentCopy /></el-icon>
+              <div class="action-info">
+                <div class="action-title">导出报告</div>
+                <div class="action-desc">生成分析报告</div>
+              </div>
+            </div>
           </div>
         </div>
       </el-col>
@@ -120,11 +127,13 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { getPaperStats } from '@/api/papers'
-import { getCitationAnalysis } from '@/api/analysis'
+import { getCitationAnalysis, exportReport } from '@/api/analysis'
 import * as echarts from 'echarts'
 
 const router = useRouter()
+const exporting = ref(false)
 
 const yearChartRef = ref(null)
 const keywordChartRef = ref(null)
@@ -347,6 +356,59 @@ const goToCooperation = () => router.push('/cooperation')
 const goToCitation = () => router.push('/citation')
 const goToTrends = () => router.push('/trends')
 
+const handleExportReport = () => {
+  ElMessageBox.confirm('请选择报告导出格式', '导出分析报告', {
+    confirmButtonText: '导出HTML',
+    cancelButtonText: '导出PDF',
+    distinguishCancelAndClose: true,
+    type: 'info',
+    customClass: 'export-report-dialog'
+  }).then(() => {
+    doExportReport('html')
+  }).catch((action) => {
+    if (action === 'cancel') {
+      doExportReport('pdf')
+    }
+  })
+}
+
+const doExportReport = async (format) => {
+  if (exporting.value) return
+  exporting.value = true
+  
+  try {
+    const blob = await exportReport({ format: 'html' })
+    
+    if (format === 'html') {
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `文献计量分析报告-${Date.now()}.html`
+      link.click()
+      window.URL.revokeObjectURL(url)
+      ElMessage.success('HTML报告导出成功')
+    } else {
+      const url = window.URL.createObjectURL(blob)
+      const newWindow = window.open(url, '_blank')
+      if (newWindow) {
+        newWindow.onload = () => {
+          setTimeout(() => {
+            newWindow.print()
+          }, 800)
+        }
+        ElMessage.success('PDF报告预览已打开，请使用浏览器打印功能保存为PDF')
+      } else {
+        ElMessage.warning('请允许弹出窗口以导出PDF报告')
+      }
+    }
+  } catch (e) {
+    console.error('导出报告失败:', e)
+    ElMessage.error('导出报告失败，请稍后重试')
+  } finally {
+    exporting.value = false
+  }
+}
+
 const handleResize = () => {
   yearChart?.resize()
   keywordChart?.resize()
@@ -492,6 +554,7 @@ onMounted(() => {
       &.network { background: linear-gradient(135deg, #67c23a, #85ce61); }
       &.citation { background: linear-gradient(135deg, #e6a23c, #ebb563); }
       &.trend { background: linear-gradient(135deg, #f56c6c, #f78989); }
+      &.report { background: linear-gradient(135deg, #722ed1, #9254de); }
     }
 
     .action-info {

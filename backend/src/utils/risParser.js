@@ -37,7 +37,16 @@ class RISParser {
       'SN': 'issn',
       'AN': 'accessionNumber',
       'M3': 'type',
-      'C1': 'notes',
+      'C1': 'affiliations',
+      'C2': 'affiliations',
+      'C3': 'affiliations',
+      'AD': 'affiliations',
+      'AF': 'affiliations',
+      'PI': 'affiliations',
+      'FU': 'funding',
+      'FD': 'funding',
+      'FS': 'funding',
+      'FG': 'funding',
       'N1': 'notes',
       'U1': 'notes',
       'U2': 'notes',
@@ -74,7 +83,7 @@ class RISParser {
         const field = this.fieldMap[tag];
 
         if (field) {
-          if (field === 'authors' || field === 'keywords') {
+          if (['authors', 'keywords', 'affiliations', 'funding'].includes(field)) {
             if (!currentEntry[field]) {
               currentEntry[field] = [];
             }
@@ -109,6 +118,8 @@ class RISParser {
         doi: entry.doi || '',
         abstract: entry.abstract || '',
         keywords: entry.keywords || [],
+        funding: entry.funding || [],
+        affiliations: entry.affiliations || [],
         source: 'ris'
       };
 

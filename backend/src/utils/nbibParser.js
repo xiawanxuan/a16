@@ -34,7 +34,17 @@ class NBibParser {
       'PT  -': 'type',
       'PL': 'place',
       'PL  -': 'place',
-      'TA': 'journalAbbrev'
+      'TA': 'journalAbbrev',
+      'AD': 'affiliations',
+      'AD  -': 'affiliations',
+      'AFFIL': 'affiliations',
+      'AFFIL -': 'affiliations',
+      'GR': 'funding',
+      'GR  -': 'funding',
+      'GRANT': 'funding',
+      'GRANT -': 'funding',
+      'PS': 'funding',
+      'PS  -': 'funding'
     };
   }
 
@@ -66,7 +76,7 @@ class NBibParser {
 
         const field = this.fieldMap[tag];
         if (field && value) {
-          if (field === 'authors' || field === 'keywords') {
+          if (['authors', 'keywords', 'affiliations', 'funding'].includes(field)) {
             if (!currentEntry[field]) {
               currentEntry[field] = [];
             }
@@ -110,6 +120,8 @@ class NBibParser {
         doi: '',
         abstract: entry.abstract || '',
         keywords: entry.keywords || [],
+        funding: entry.funding || [],
+        affiliations: entry.affiliations || [],
         pmid: entry.pmid || '',
         source: 'nbib'
       };

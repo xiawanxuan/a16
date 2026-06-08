@@ -29,7 +29,9 @@ class CSVParser {
       doi: ['doi', 'DOI', 'DI', 'DOI编号'],
       abstract: ['abstract', 'Abstract', 'AB', '摘要', '内容摘要'],
       keywords: ['keywords', 'keyword', 'Keywords', 'Keyword', 'DE', 'ID', '关键词', '作者关键词'],
-      citations: ['citations', 'cited', 'Citations', 'Cited', '被引频次', '被引次数', '引用次数']
+      citations: ['citations', 'cited', 'Citations', 'Cited', '被引频次', '被引次数', '引用次数'],
+      funding: ['funding', 'fund', 'Funding', 'Fund', 'FU', '基金', '基金项目', '资助', '资助项目', '致谢'],
+      affiliations: ['affiliation', 'affiliations', 'Affiliation', 'Affiliations', 'AF', '机构', '单位', '作者单位', '所属机构']
     };
 
     const mergedMapping = { ...defaultMapping, ...fieldMapping };
@@ -54,9 +56,13 @@ class CSVParser {
     const abstract = getValue(mergedMapping.abstract);
     const keywordsStr = getValue(mergedMapping.keywords);
     const citationsStr = getValue(mergedMapping.citations);
+    const fundingStr = getValue(mergedMapping.funding);
+    const affiliationsStr = getValue(mergedMapping.affiliations);
 
     const authors = this.parseAuthors(authorsStr);
     const keywords = this.parseKeywords(keywordsStr);
+    const funding = this.parseListField(fundingStr);
+    const affiliations = this.parseListField(affiliationsStr);
     const year = yearStr ? parseInt(yearStr, 10) : null;
     const citations = citationsStr ? parseInt(citationsStr, 10) : 0;
 
@@ -79,6 +85,8 @@ class CSVParser {
       doi,
       abstract,
       keywords,
+      funding,
+      affiliations,
       citations,
       source: 'csv',
       fields: extraFields
@@ -126,6 +134,26 @@ class CSVParser {
     return keywords
       .map(k => k.trim())
       .filter(k => k.length > 0);
+  }
+
+  parseListField(fieldStr) {
+    if (!fieldStr) return [];
+
+    let items = [];
+
+    if (fieldStr.includes(';')) {
+      items = fieldStr.split(';');
+    } else if (fieldStr.includes('，')) {
+      items = fieldStr.split('，');
+    } else if (fieldStr.includes(',')) {
+      items = fieldStr.split(',');
+    } else {
+      items = [fieldStr];
+    }
+
+    return items
+      .map(item => item.trim())
+      .filter(item => item.length > 0);
   }
 
   parseToPapers(content, fieldMapping = {}) {

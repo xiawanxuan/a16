@@ -85,6 +85,8 @@ class BibTeXParser {
     const year = bibEntry.year ? parseInt(bibEntry.year, 10) : null;
     const citations = bibEntry.citations ? parseInt(bibEntry.citations, 10) : 
                       bibEntry.times_cited ? parseInt(bibEntry.times_cited, 10) : 0;
+    const funding = this.parseFunding(bibEntry.funding || bibEntry.fund || bibEntry.acknowledgement || '');
+    const affiliations = this.parseAffiliations(bibEntry.affiliation || bibEntry.affil || bibEntry.institution || '');
 
     return {
       title: bibEntry.title || '',
@@ -97,6 +99,8 @@ class BibTeXParser {
       doi: bibEntry.doi || '',
       abstract: bibEntry.abstract || '',
       keywords,
+      funding,
+      affiliations,
       citations,
       source: 'bibtex',
       fields: {
@@ -113,6 +117,22 @@ class BibTeXParser {
         editor: bibEntry.editor || ''
       }
     };
+  }
+
+  parseFunding(fundingStr) {
+    if (!fundingStr) return [];
+    return fundingStr
+      .split(/[;；]/)
+      .map(f => f.trim())
+      .filter(f => f.length > 0);
+  }
+
+  parseAffiliations(affStr) {
+    if (!affStr) return [];
+    return affStr
+      .split(/[;；]/)
+      .map(a => a.trim())
+      .filter(a => a.length > 0);
   }
 
   parseAuthors(authorsStr) {
